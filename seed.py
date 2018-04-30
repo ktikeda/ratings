@@ -1,14 +1,14 @@
 """Utility file to seed ratings database from MovieLens data in seed_data/"""
 
 from sqlalchemy import func
-from model import User
+from model import User, Movie, Rating
 # from model import Rating
 # from model import Movie
 
 from model import connect_to_db, db
 from server import app
 
-import datetime
+from datetime import datetime
 import re
 
 
@@ -42,17 +42,27 @@ def load_movies():
 
     print "Movies"
 
+    Movie.query.delete()
+
     with open("seed_data/u.item") as movie_data:
 
-
-        id = 1
         for row in movie_data:
             row = row.rstrip()
             row_data = row.split("|")
-            movie_id = id
-            id += 1
-            title = re.match()
 
+            pattern = r'(\s\([0-9]{4}\))?$'
+            title = re.sub(pattern, '', row_data[1])
+
+            date_as_str = row_data[2]
+            date = datetime.strptime(date_as_str, '%d-%b-%Y')
+
+            imdb_url = row_data[4]
+
+            movie = Movie(title=title, released_at=date, imdb_url=imdb_url)
+
+            db.session.add(movie)
+
+    db.session.commit()
 
 
 def load_ratings():
