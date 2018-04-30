@@ -8,6 +8,8 @@ from model import User
 from model import connect_to_db, db
 from server import app
 
+import datetime
+
 
 def load_users():
     """Load users from u.user into database."""
