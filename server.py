@@ -2,7 +2,11 @@
 
 from jinja2 import StrictUndefined
 
-from flask import Flask
+from flask import (Flask, render_template, redirect, request, flash,
+                   session)
+
+from model import User, Rating, Movie, connect_to_db, db
+
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import connect_to_db, db
@@ -22,7 +26,7 @@ app.jinja_env.undefined = StrictUndefined
 @app.route('/')
 def index():
     """Homepage."""
-    return "<html><body>Placeholder for the homepage.</body></html>"
+    return render_template('homepage.html')
 
 
 if __name__ == "__main__":
