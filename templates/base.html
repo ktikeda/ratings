@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Ratings</title>
+	<title>{% block title %}my title{% endblock %}</title>
 </head>
 <body>
-	Ratings
-	<hr>
+	<ul>
+  	{% for message in get_flashed_messages() %}
+    	<li>{{ message }}</li>
+  	{% endfor %}
+	</ul>
+
+	<!-- Ratings
+	<hr> -->
 
 	{% block content %} put your content here {% endblock %}
 

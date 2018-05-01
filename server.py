@@ -59,15 +59,59 @@ def register_user():
 
     q = User.query.filter(User.email == user_email).all()
 
-    if q:
-        print "The user already exists"
-    else:
+    if q: #if list is not empty
+        flash("The user already exists")
+        return render_template('register.html')
+    else: #if empty list
         new_user = User(email=user_email, password=password)
         print new_user
         db.session.add(new_user)
         db.session.commit()
+        flash("Your account has been created")
+        return redirect('/login')
 
-    return render_template('register.html')
+    
+
+
+@app.route('/login')
+def login_form():
+    """Show login form"""
+    # redirect user to homepage if logged in
+    if 'user_id' in session:
+        return redirect('/')
+    else:
+        return render_template('login.html')
+
+@app.route('/login', methods=["POST"])
+def login_user():
+    """Logs in a user if they are in the database"""
+
+    user_email = request.form.get('email')
+    password = request.form.get('pw')
+
+    user_q = User.query.filter(User.email == user_email).all()
+    print user_q
+
+    if user_q:
+        user = user_q[0]
+        if user.password == password:
+            flash('Logged in')
+            session['user_id'] = user.user_id
+            return redirect('/')
+        else:
+            flash('Wrong password -- try again')
+            return render_template('login.html')
+    else:
+        flash('This user/password combination does not exist. Try again.')
+        return render_template('login.html')
+
+
+@app.route('/logout')
+def logout_user():
+    """Logs out user"""
+    # session['user_id'] = None
+    session.clear()
+    return redirect('/')
 
 
 if __name__ == "__main__":
