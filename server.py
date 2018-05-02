@@ -44,6 +44,17 @@ def user_list():
     return render_template('user_list.html', users=users)
 
 
+@app.route('/users/<user_id>')
+def user_profile(user_id):
+    """Individual user profile including movies rated and scores."""
+
+    # user = User.query.get(user_id)
+    # movie_ratings = db.session.query(Movie.title, Rating.score).join(Rating).filter(Rating.user_id==user_id).order_by(Movie.title).all()
+    user = User.query.options(db.joinedload('ratings').joinedload('movie')).get(user_id)
+
+    return render_template('user_profile.html', user=user)
+
+
 @app.route('/register')
 def register_user_form():
     """Shows a registration form."""
@@ -71,16 +82,15 @@ def register_user():
         return redirect('/login')
 
     
-
-
 @app.route('/login')
 def login_form():
     """Show login form"""
     # redirect user to homepage if logged in
     if 'user_id' in session:
-        return redirect('/')
+        return redirect('/users/')
     else:
         return render_template('login.html')
+
 
 @app.route('/login', methods=["POST"])
 def login_user():
@@ -97,7 +107,7 @@ def login_user():
         if user.password == password:
             flash('Logged in')
             session['user_id'] = user.user_id
-            return redirect('/')
+            return redirect('/users/' + str(session['user_id']))
         else:
             flash('Wrong password -- try again')
             return render_template('login.html')
