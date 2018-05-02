@@ -13,6 +13,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import connect_to_db, db
 
+from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -67,8 +69,36 @@ def movie_list():
 def movie_ratings(movie_id):
     """Info about movie including past ratings plus ratings form."""
     movie = Movie.query.options(db.joinedload('ratings')).get(movie_id)
+    release_date = datetime.strftime(movie.released_at, '%B %-d, %Y')
 
-    return render_template('movie_profile.html', movie=movie)
+    all_ratings = ""
+
+    # all_ratings = ', '.join([movie.score for movie in movie.ratings])
+
+
+    return render_template('movie_profile.html', movie=movie, released_at=release_date, all_ratings=all_ratings)
+
+@app.route('/movies/<movie_id>', methods=["POST"])
+def add_rating(movie_id):
+    """Adds new rating to db or updates existing rating for user."""
+
+    new_score = request.form.get("score")
+    user = session['user_id']
+
+    q = Rating.query.filter(Rating.movie_id == movie_id, Rating.user_id == user).first()
+    print q
+    if q: #if list is not empty
+        q.score = new_score
+        db.session.commit()
+        flash("Your rating has been updated")
+
+    else:
+        new_movie_rating = Rating(score=new_score, movie_id=movie_id, user_id=user)
+        db.session.add(new_movie_rating)
+        db.session.commit()
+        flash("Your rating has been added")
+        
+    return redirect('/movies/' + str(movie_id))
 
 
 @app.route('/register')
