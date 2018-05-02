@@ -23,6 +23,13 @@ class User(db.Model):
     age = db.Column(db.Integer, nullable=True)
     zipcode = db.Column(db.String(15), nullable=True)
 
+
+    movies = db.relationship("Movie",
+                             secondary="ratings",
+                             backref="users", order_by='Movie.title')
+
+
+
     def __repr__(self):
         """Provide helpful representation when printed"""
 
@@ -56,6 +63,7 @@ class Rating(db.Model):
     user = db.relationship('User', backref=db.backref('ratings', order_by=rating_id))
 
     movie = db.relationship('Movie', backref=db.backref('ratings', order_by=rating_id))
+
 
 
 ##############################################################################

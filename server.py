@@ -55,6 +55,22 @@ def user_profile(user_id):
     return render_template('user_profile.html', user=user)
 
 
+@app.route('/movies')
+def movie_list():
+    """List of movies."""
+
+    movies = Movie.query.order_by(Movie.title).all()
+
+    return render_template('movie_list.html', movies=movies)
+
+@app.route('/movies/<movie_id>')
+def movie_ratings(movie_id):
+    """Info about movie including past ratings plus ratings form."""
+    movie = Movie.query.options(db.joinedload('ratings')).get(movie_id)
+
+    return render_template('movie_profile.html', movie=movie)
+
+
 @app.route('/register')
 def register_user_form():
     """Shows a registration form."""
