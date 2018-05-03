@@ -1,6 +1,7 @@
 """Pearson correlation."""
 
 from math import sqrt
+from flask_sqlalchemy import SQLAlchemy
 
 
 def pearson(pairs):
@@ -32,3 +33,33 @@ def pearson(pairs):
         return 0
 
     return numerator / denominator
+
+m = Movie.query.filter_by(title="Toy Story").one()
+u = User.query.get(1)    # someone we know who hasn't rated TS
+
+ratings = u.ratings # User 1's ratings in a list of Rating objects
+user1_movies = set([r.movie for r in ratings])
+
+# Find users who have also rated Toy Story
+other_ratings = Rating.query.filter_by(movie_id=m.movie_id).all()
+other_users = [r.user for r in other_ratings]
+
+pearson_nums = {}
+
+for user in other_users:
+    pairs = []
+    user_movies = set([r.movie for r in user.ratings])
+    common_movies = user1_movies && user_movies
+    
+    for movie in common_movies:
+        rating1 = Rating.query.filter(
+            Rating.movie_id == movie.movie_id, Rating.user_id == u.user_id).one()
+        rating2 = Rating.query.filter(
+            Rating.movie_id == movie.movie_id, Rating.user_id == user.user_id).one()
+        pairs.append((int(rating1.score), int(rating2.score)))
+
+    pearson_num = pearson(pairs)
+
+    if len(pairs) > 4 or pearson_num > 0.95:
+        pearson_nums[user] = pearson_num
+    

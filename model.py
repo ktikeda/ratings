@@ -62,10 +62,14 @@ class Rating(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     score = db.Column(db.Integer, nullable=False)
 
-    user = db.relationship('User', backref=db.backref('ratings', order_by=rating_id))
+    user = db.relationship('User', backref=db.backref('ratings', order_by=movie_id))
 
     movie = db.relationship('Movie', order_by='Movie.title')
 
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        return "<Rating movie_id={} Movie.title={} score={}>".format(self.movie_id, self.movie.title, self.score)
 
 
 ##############################################################################
