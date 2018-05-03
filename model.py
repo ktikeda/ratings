@@ -45,6 +45,8 @@ class Movie(db.Model):
     released_at = db.Column(db.DateTime, nullable=False)
     imdb_url = db.Column(db.String(256), nullable=True)
 
+    ratings = db.relationship('Rating')
+
     def __repr__(self):
         """Provide helpful representation when printed"""
 
@@ -62,7 +64,7 @@ class Rating(db.Model):
 
     user = db.relationship('User', backref=db.backref('ratings', order_by=rating_id))
 
-    movie = db.relationship('Movie', backref=db.backref('ratings', order_by=rating_id))
+    movie = db.relationship('Movie', order_by='Movie.title')
 
 
 

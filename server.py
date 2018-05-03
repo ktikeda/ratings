@@ -36,6 +36,8 @@ def index():
     """Homepage."""
     return render_template('homepage.html')
 
+    #redirect to user profile if logged in
+
 
 @app.route('/users')
 def user_list():
@@ -52,7 +54,12 @@ def user_profile(user_id):
 
     # user = User.query.get(user_id)
     # movie_ratings = db.session.query(Movie.title, Rating.score).join(Rating).filter(Rating.user_id==user_id).order_by(Movie.title).all()
+
+    # movies = sorted([rating.movie.title for rating in user.ratings])
+
     user = User.query.options(db.joinedload('ratings').joinedload('movie')).get(user_id)
+
+    # movies = sorted([rating.movie.title, for rating in user.ratings])
 
     return render_template('user_profile.html', user=user)
 
@@ -65,39 +72,47 @@ def movie_list():
 
     return render_template('movie_list.html', movies=movies)
 
+
 @app.route('/movies/<movie_id>')
 def movie_ratings(movie_id):
     """Info about movie including past ratings plus ratings form."""
-    movie = Movie.query.options(db.joinedload('ratings')).get(movie_id)
+    movie = Movie.query.get(movie_id)
     release_date = datetime.strftime(movie.released_at, '%B %-d, %Y')
 
-    all_ratings = ""
-
-    # all_ratings = ', '.join([movie.score for movie in movie.ratings])
-
+    all_ratings = ', '.join([str(rating.score) for rating in movie.ratings])
 
     return render_template('movie_profile.html', movie=movie, released_at=release_date, all_ratings=all_ratings)
+
 
 @app.route('/movies/<movie_id>', methods=["POST"])
 def add_rating(movie_id):
     """Adds new rating to db or updates existing rating for user."""
 
     new_score = request.form.get("score")
-    user = session['user_id']
 
-    q = Rating.query.filter(Rating.movie_id == movie_id, Rating.user_id == user).first()
-    print q
-    if q: #if list is not empty
-        q.score = new_score
-        db.session.commit()
-        flash("Your rating has been updated")
+    try:
+        new_score = int(new_score)
+    except ValueError:
+        flash('This is not a valid rating.') 
+
+    if new_score < 1 or new_score > 5:
+        flash('This is not a valid rating.')
 
     else:
-        new_movie_rating = Rating(score=new_score, movie_id=movie_id, user_id=user)
-        db.session.add(new_movie_rating)
-        db.session.commit()
-        flash("Your rating has been added")
-        
+        user = session['user_id']
+        rating = Rating.query.filter(Rating.movie_id == movie_id, Rating.user_id == user).first()
+        # print q
+        if rating: #if list is not empty
+            rating.score = new_score
+            db.session.commit()
+            flash("Your rating has been updated")
+
+        else:
+            new_movie_rating = Rating(score=new_score, movie_id=movie_id, user_id=user)
+            db.session.add(new_movie_rating)
+            db.session.commit()
+            flash("Your rating has been added")
+            
     return redirect('/movies/' + str(movie_id))
 
 

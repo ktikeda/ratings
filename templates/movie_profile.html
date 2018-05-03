@@ -10,18 +10,15 @@
 <p>Released at : {{ released_at }}</p>
 <p>IMDB url : <a href="{{ movie.imdb_url }}">{{ movie.imdb_url }}</a></p>
 <p>User ratings:</p>
-<p>  
-    {% for rating in movie.ratings %}
-      
-        {{ rating.score }}, 
-      
-    {% endfor %}
-</p>
+<p>{{ all_ratings }}</p>
 
 {% if 'user_id' in session %}
-<h2>Rate this movie:</h2>
+<h2>Rate this movie on a scale of 1 to 5 (1=bad, 5=great):</h2>
+
+<!-- Add user's rating -->
+
 <form action="/movies/{{ movie.movie_id }}" method="POST">
-	Rating: <input type="text" name="score"><br>
+	Rating: <input type="text" name="score">
 	<input type="submit" value="Submit">
 </form>
 
